@@ -1,0 +1,23 @@
+{
+  "overview": "A mobile-first business billing and accounting app for Indian small and medium businesses. Manage invoices with GST auto-calculation, track inventory, and monitor business performance — all from a clean, modern dashboard.",
+  "features": [
+    "Dashboard with KPI cards — Today Sales, Monthly Sales, Outstanding Payments, Inventory Value",
+    "Invoice creation with auto-calculated GST (CGST+SGST), PDF download, and preview",
+    "Inventory management with product catalog, stock status alerts, and barcode scanning",
+    "Internet Identity login with guest mode and business onboarding setup",
+    "Bottom navigation, floating action button, and side drawer menu",
+    "Realistic Indian business placeholder data in INR"
+  ],
+  "category": "productivity",
+  "tags": [
+    "billing",
+    "invoicing",
+    "inventory",
+    "accounting",
+    "gst",
+    "india",
+    "smb",
+    "mobile-first"
+  ],
+  "last_updated": "2026-05-01T08:55:01.145Z"
+}

@@ -1,0 +1,145 @@
+// Version: 1.0.0
+type BusinessId__305161641 = Principal;
+type BusinessProfile__625766292 =
+  {
+    address : Text;
+    businessId : BusinessId__305161641;
+    category : Text;
+    currency : Text;
+    email : Text;
+    gstNumber : ?Text;
+    language : Text;
+    logoUrl : ?Text;
+    name : Text;
+    phone : Text
+  };
+type CustomerId__1015005394 = Nat;
+type Customer__192853522 =
+  {
+    address : ?Text;
+    createdAt : Timestamp__301639476;
+    customerId : CustomerId__1015005394;
+    email : ?Text;
+    gstNumber : ?Text;
+    name : Text;
+    pendingAmount : Nat;
+    phone : Text;
+    totalPurchaseAmount : Nat
+  };
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type InvoiceId__909937669 = Nat;
+type InvoiceItem__922149459 =
+  {
+    discount : Nat;
+    lineTotal : Nat;
+    productId : ?ProductId__160010635;
+    productName : Text;
+    quantity : Nat;
+    taxPercent : Nat;
+    unitPrice : Nat
+  };
+type InvoiceStatus__932546339 = {#Draft; #Paid; #Sent};
+type Invoice__785106573 =
+  {
+    cgst : Nat;
+    createdAt : Timestamp__301639476;
+    customerId : ?CustomerId__1015005394;
+    customerName : Text;
+    customerPhone : Text;
+    discount : Nat;
+    dueDate : ?Timestamp__301639476;
+    invoiceId : InvoiceId__909937669;
+    invoiceNumber : Text;
+    items : [InvoiceItem__922149459];
+    notes : ?Text;
+    paymentStatus : PaymentStatus__1050999476;
+    sgst : Nat;
+    status : InvoiceStatus__932546339;
+    subtotal : Nat;
+    total : Nat;
+    updatedAt : Timestamp__301639476
+  };
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type Map__158565046<K, V> = Map__297112838<K, V>;
+type Map__297112838<K, V> =
+  {var root : Node__46230540<K, V>; var size : Nat__490723111};
+type Map__605269027<K, V> = Map__158565046<K, V>;
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type PaymentStatus__1050999476 = {#Paid; #Partial; #Unpaid};
+type ProductId__160010635 = Nat;
+type Product__247116600 =
+  {
+    barcode : ?Text;
+    category : Text;
+    createdAt : Timestamp__301639476;
+    imageUrl : ?Text;
+    name : Text;
+    productId : ProductId__160010635;
+    purchasePrice : Nat;
+    quantity : Nat;
+    sellingPrice : Nat;
+    sku : Text;
+    supplierName : ?Text;
+    taxPercent : Nat;
+    unit : Text
+  };
+type StockUpdateId__188221532 = Nat;
+type StockUpdate__13183486 =
+  {
+    changeReason : Text;
+    changedAt : Timestamp__301639476;
+    newQty : Nat;
+    previousQty : Nat;
+    productId : ProductId__160010635;
+    productName : Text;
+    updateId : StockUpdateId__188221532
+  };
+type Timestamp__301639476 = Int;
+type UserRole__1073662873 = {#admin; #guest; #user};
+actor {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1073662873>
+    };
+  stable businessProfiles :
+    {
+      var root : Node__46230540<Principal, BusinessProfile__625766292>;
+      var size : Nat__490723111
+    };
+  stable customers :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Customer__192853522]];
+      var elementIndex : Nat__490723111
+    };
+  stable invoices :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Invoice__785106573]];
+      var elementIndex : Nat__490723111
+    };
+  stable nextCustomerId : {var val : Nat};
+  stable nextInvoiceId : {var val : Nat};
+  stable nextProductId : {var val : Nat};
+  stable nextStockUpdateId : {var val : Nat};
+  stable products :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Product__247116600]];
+      var elementIndex : Nat__490723111
+    };
+  stable var seedDone : Bool;
+  stable stockUpdates :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?StockUpdate__13183486]];
+      var elementIndex : Nat__490723111
+    }
+};

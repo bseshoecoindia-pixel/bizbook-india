@@ -1,0 +1,221 @@
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type Timestamp = int;
+type StockUpdateId = nat;
+type StockUpdate = 
+ record {
+   changeReason: text;
+   changedAt: Timestamp;
+   newQty: nat;
+   previousQty: nat;
+   productId: ProductId;
+   productName: text;
+   updateId: StockUpdateId;
+ };
+type ProductInput = 
+ record {
+   barcode: opt text;
+   category: text;
+   imageUrl: opt text;
+   name: text;
+   purchasePrice: nat;
+   quantity: nat;
+   sellingPrice: nat;
+   sku: text;
+   supplierName: opt text;
+   taxPercent: nat;
+   unit: text;
+ };
+type ProductId = nat;
+type Product = 
+ record {
+   barcode: opt text;
+   category: text;
+   createdAt: Timestamp;
+   imageUrl: opt text;
+   name: text;
+   productId: ProductId;
+   purchasePrice: nat;
+   quantity: nat;
+   sellingPrice: nat;
+   sku: text;
+   supplierName: opt text;
+   taxPercent: nat;
+   unit: text;
+ };
+type PaymentStatus = 
+ variant {
+   Paid;
+   Partial;
+   Unpaid;
+ };
+type PaginatedResult_2 = 
+ record {
+   items: vec Customer;
+   page: nat;
+   pageSize: nat;
+   total: nat;
+ };
+type PaginatedResult_1 = 
+ record {
+   items: vec Invoice;
+   page: nat;
+   pageSize: nat;
+   total: nat;
+ };
+type PaginatedResult = 
+ record {
+   items: vec Product;
+   page: nat;
+   pageSize: nat;
+   total: nat;
+ };
+type InvoiceStatus = 
+ variant {
+   Draft;
+   Paid;
+   Sent;
+ };
+type InvoiceItem = 
+ record {
+   discount: nat;
+   lineTotal: nat;
+   productId: opt ProductId;
+   productName: text;
+   quantity: nat;
+   taxPercent: nat;
+   unitPrice: nat;
+ };
+type InvoiceInput = 
+ record {
+   cgst: nat;
+   customerId: opt CustomerId;
+   customerName: text;
+   customerPhone: text;
+   discount: nat;
+   dueDate: opt Timestamp;
+   items: vec InvoiceItem;
+   notes: opt text;
+   paymentStatus: PaymentStatus;
+   sgst: nat;
+   status: InvoiceStatus;
+   subtotal: nat;
+   total: nat;
+ };
+type InvoiceId = nat;
+type Invoice = 
+ record {
+   cgst: nat;
+   createdAt: Timestamp;
+   customerId: opt CustomerId;
+   customerName: text;
+   customerPhone: text;
+   discount: nat;
+   dueDate: opt Timestamp;
+   invoiceId: InvoiceId;
+   invoiceNumber: text;
+   items: vec InvoiceItem;
+   notes: opt text;
+   paymentStatus: PaymentStatus;
+   sgst: nat;
+   status: InvoiceStatus;
+   subtotal: nat;
+   total: nat;
+   updatedAt: Timestamp;
+ };
+type DashboardStats = 
+ record {
+   inventoryValue: nat;
+   lowStockCount: nat;
+   monthlySales: nat;
+   outstandingPayments: nat;
+   todaySales: nat;
+   totalCustomers: nat;
+ };
+type CustomerInput = 
+ record {
+   address: opt text;
+   email: opt text;
+   gstNumber: opt text;
+   name: text;
+   phone: text;
+ };
+type CustomerId = nat;
+type Customer = 
+ record {
+   address: opt text;
+   createdAt: Timestamp;
+   customerId: CustomerId;
+   email: opt text;
+   gstNumber: opt text;
+   name: text;
+   pendingAmount: nat;
+   phone: text;
+   totalPurchaseAmount: nat;
+ };
+type BusinessProfileInput = 
+ record {
+   address: text;
+   category: text;
+   currency: text;
+   email: text;
+   gstNumber: opt text;
+   language: text;
+   logoUrl: opt text;
+   name: text;
+   phone: text;
+ };
+type BusinessProfile = 
+ record {
+   address: text;
+   businessId: BusinessId;
+   category: text;
+   currency: text;
+   email: text;
+   gstNumber: opt text;
+   language: text;
+   logoUrl: opt text;
+   name: text;
+   phone: text;
+ };
+type BusinessId = principal;
+service : {
+  _initializeAccessControl: () -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  createCustomer: (input: CustomerInput) -> (Customer);
+  createInvoice: (input: InvoiceInput) -> (Invoice);
+  createProduct: (input: ProductInput) -> (Product);
+  deleteBusinessProfile: () -> (bool);
+  deleteCustomer: (id: CustomerId) -> (bool);
+  deleteInvoice: (id: InvoiceId) -> (bool);
+  deleteProduct: (id: ProductId) -> (bool);
+  getBusinessProfile: () -> (opt BusinessProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getCustomer: (id: CustomerId) -> (opt Customer) query;
+  getDashboardStats: () -> (DashboardStats) query;
+  getInvoice: (id: InvoiceId) -> (opt Invoice) query;
+  getInvoicesByCustomer: (customerId: CustomerId) -> (vec Invoice) query;
+  getInvoicesByStatus: (status: InvoiceStatus) -> (vec Invoice) query;
+  getLowStockProducts: () -> (vec Product) query;
+  getProduct: (id: ProductId) -> (opt Product) query;
+  getStockHistory: (id: ProductId) -> (vec StockUpdate) query;
+  initSeedData: () -> ();
+  isCallerAdmin: () -> (bool) query;
+  listCustomers: (page: nat, pageSize: nat) -> (PaginatedResult_2) query;
+  listInvoices: (page: nat, pageSize: nat) -> (PaginatedResult_1) query;
+  listProducts: (page: nat, pageSize: nat) -> (PaginatedResult) query;
+  saveBusinessProfile: (input: BusinessProfileInput) -> (BusinessProfile);
+  updateBusinessProfile: (input: BusinessProfileInput) ->
+   (opt BusinessProfile);
+  updateCustomer: (id: CustomerId, input: CustomerInput) -> (opt Customer);
+  updateInvoice: (id: InvoiceId, input: InvoiceInput) -> (opt Invoice);
+  updateInvoicePaymentStatus: (id: InvoiceId, paymentStatus:
+   PaymentStatus) -> (opt Invoice);
+  updateProduct: (id: ProductId, input: ProductInput) -> (opt Product);
+  updateProductStock: (id: ProductId, newQty: nat, reason: text) ->
+   (opt StockUpdate);
+}
