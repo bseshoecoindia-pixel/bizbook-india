@@ -1,23 +1,30 @@
 {
-  "overview": "A mobile-first business billing and accounting app for Indian small and medium businesses. Manage invoices with GST auto-calculation, track inventory, and monitor business performance — all from a clean, modern dashboard.",
+  "overview": "BizBook India is a premium, mobile-first billing and accounting app for small and medium businesses in India. It features invoice creation with auto-calculated GST, inventory management, customer and supplier management, expense tracking with receipt photos, purchase order tracking, detailed P&L and GST reports, email invoice delivery, and a full admin panel with user management.",
   "features": [
-    "Dashboard with KPI cards — Today Sales, Monthly Sales, Outstanding Payments, Inventory Value",
-    "Invoice creation with auto-calculated GST (CGST+SGST), PDF download, and preview",
-    "Inventory management with product catalog, stock status alerts, and barcode scanning",
-    "Internet Identity login with guest mode and business onboarding setup",
-    "Bottom navigation, floating action button, and side drawer menu",
-    "Realistic Indian business placeholder data in INR"
+    "Invoice creation with GST auto-calculation (CGST+SGST at 18%)",
+    "Inventory management with stock status badges",
+    "Customer and supplier CRUD with ledgers",
+    "Expense tracker with receipt photo uploads",
+    "Purchase order tracking (Ordered/Received/Cancelled)",
+    "P&L report calculated fresh on every page load",
+    "GSTR-1 tax report with CSV/PDF export",
+    "Email invoice delivery to customers",
+    "Settings with 4 themes: light, dark, sepia, high-contrast",
+    "Admin panel with user management and role labels",
+    "Mobile-first responsive design optimized for India SMBs"
   ],
-  "category": "productivity",
+  "category": "business-finance",
   "tags": [
     "billing",
-    "invoicing",
-    "inventory",
     "accounting",
     "gst",
     "india",
     "smb",
+    "invoices",
+    "inventory",
+    "expenses",
+    "reports",
     "mobile-first"
   ],
-  "last_updated": "2026-05-01T08:55:01.145Z"
+  "last_updated": "2026-05-03T05:48:10.481Z"
 }

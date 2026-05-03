@@ -1,9 +1,10 @@
 {
   "version": 3,
-  "mopsTomlDepsHash": "7bd1b4debb8c2f6d61b6837b632ed7c7d49bba3b4f1d523f405068f5ccc53c4c",
+  "mopsTomlDepsHash": "fd5037bb2e3e5e0e1a73f4f5ec55ce9922097b24f7133955fee0001c966f9230",
   "deps": {
     "core": "2.2.0",
-    "caffeineai-authorization": "0.1.1"
+    "caffeineai-authorization": "0.1.1",
+    "caffeineai-email": "0.1.1"
   },
   "hashes": {
     "core@2.2.0": {
@@ -72,6 +73,12 @@
       "caffeineai-authorization@0.1.1/rules/no-redeclare-assign-caller-user-role.toml": "e8669dfe4931aaa4268682877388255342ce2cb2cdafd21a121ddf22ef42b500",
       "caffeineai-authorization@0.1.1/rules/mixin-authorization-included.toml": "57fa6a81594ea8c12e0a3315c36dec4adf718444b8ef70a11cda1aaa1b11624a",
       "caffeineai-authorization@0.1.1/src/access-control.mo": "e517d2a028b510d804a633631a15981160def610ea9410dd5a122f92af3c04d8"
+    },
+    "caffeineai-email@0.1.1": {
+      "caffeineai-email@0.1.1/README.md": "7bc10bb86dc7b577268d48cdcc2f877ea8cbc15ee9af57199232121ad242159b",
+      "caffeineai-email@0.1.1/src/emailService.mo": "789ff9fe602991267ff872bea66531cce0c7b430c18162e2e2225f5ff9dfdfc5",
+      "caffeineai-email@0.1.1/mops.toml": "f09770f92b1bebd47650a26b42738ade255a5b4a37c6a0d15f69b89a1ac29d10",
+      "caffeineai-email@0.1.1/src/emailClient.mo": "25b691a930fae1dc13d998e105abbe76268d1c3666d5c6f9687d67e88c7168d2"
     }
   }
 }

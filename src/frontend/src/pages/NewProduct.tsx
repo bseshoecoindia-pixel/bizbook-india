@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateProduct } from "@/hooks/useBackend";
+import { useQRScanner } from "@/lib/qr-shim";
 import { ExternalBlob } from "@caffeineai/object-storage";
-import { useQRScanner } from "@caffeineai/qr-code";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Camera,

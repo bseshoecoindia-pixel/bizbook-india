@@ -21,6 +21,19 @@ export function Layout() {
 
         <BottomNav />
         <FAB />
+
+        {/* Caffeine attribution footer */}
+        <footer className="text-center py-2 text-xs text-muted-foreground bg-muted/40 border-t border-border">
+          © {new Date().getFullYear()}. Built with love using{" "}
+          <a
+            href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground transition-colors"
+          >
+            caffeine.ai
+          </a>
+        </footer>
       </div>
 
       <SideDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />

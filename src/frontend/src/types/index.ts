@@ -9,6 +9,8 @@ export type {
   InvoiceItem,
   Product,
   ProductInput,
+  Supplier,
+  SupplierInput,
   DashboardStats,
   PaginatedResult,
   PaginatedResult_1,
@@ -17,10 +19,23 @@ export type {
   CustomerId,
   ProductId,
   InvoiceId,
+  SupplierId,
   Timestamp,
+  Expense,
+  ExpenseInput,
+  ExpenseId,
+  Purchase,
+  PurchaseInput,
+  PurchaseId,
 } from "@/backend";
 
-export { InvoiceStatus, PaymentStatus, UserRole } from "@/backend";
+export {
+  InvoiceStatus,
+  PaymentStatus,
+  UserRole,
+  ExpenseCategory,
+  PurchaseStatus,
+} from "@/backend";
 
 // UI-specific types
 export interface NavItem {
@@ -46,5 +61,8 @@ export type AppRoute =
   | "/bills/new"
   | "/inventory"
   | "/customers"
+  | "/suppliers"
   | "/reports"
-  | "/settings";
+  | "/settings"
+  | "/expenses"
+  | "/purchases";

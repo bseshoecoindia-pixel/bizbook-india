@@ -13,6 +13,7 @@ import {
   Package,
   Receipt,
   Settings,
+  ShieldCheck,
   ShoppingCart,
   TrendingUp,
   Truck,
@@ -86,6 +87,12 @@ const DRAWER_ITEMS: DrawerItem[] = [
     path: "/backup",
     icon: <CloudUpload size={18} />,
     ocid: "drawer.backup_link",
+  },
+  {
+    label: "Admin Panel",
+    path: "/admin",
+    icon: <ShieldCheck size={18} />,
+    ocid: "drawer.admin_link",
   },
 ];
 

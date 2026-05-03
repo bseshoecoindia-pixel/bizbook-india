@@ -10,6 +10,19 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AdminStats {
+  'activeUsers' : bigint,
+  'supplierCount' : bigint,
+  'expenseCount' : bigint,
+  'invoiceCount' : bigint,
+  'currentMonthRevenue' : bigint,
+  'topMonthRevenue' : bigint,
+  'totalExpenses' : bigint,
+  'netPL' : bigint,
+  'totalUsers' : bigint,
+  'customerCount' : bigint,
+  'totalRevenue' : bigint,
+}
 export type BusinessId = Principal;
 export interface BusinessProfile {
   'businessId' : BusinessId,
@@ -61,6 +74,34 @@ export interface DashboardStats {
   'outstandingPayments' : bigint,
   'totalCustomers' : bigint,
 }
+export interface Expense {
+  'id' : ExpenseId,
+  'receiptUrl' : [] | [string],
+  'date' : Timestamp,
+  'createdAt' : Timestamp,
+  'description' : string,
+  'updatedAt' : Timestamp,
+  'notes' : [] | [string],
+  'category' : ExpenseCategory,
+  'amount' : bigint,
+}
+export type ExpenseCategory = { 'other' : null } |
+  { 'marketing' : null } |
+  { 'rent' : null } |
+  { 'transport' : null } |
+  { 'utilities' : null } |
+  { 'office' : null } |
+  { 'rawMaterials' : null } |
+  { 'salaries' : null };
+export type ExpenseId = bigint;
+export interface ExpenseInput {
+  'receiptUrl' : [] | [string],
+  'date' : Timestamp,
+  'description' : string,
+  'notes' : [] | [string],
+  'category' : ExpenseCategory,
+  'amount' : bigint,
+}
 export interface Invoice {
   'customerName' : string,
   'status' : InvoiceStatus,
@@ -77,6 +118,7 @@ export interface Invoice {
   'notes' : [] | [string],
   'discount' : bigint,
   'customerId' : [] | [CustomerId],
+  'emailSent' : boolean,
   'items' : Array<InvoiceItem>,
   'subtotal' : bigint,
 }
@@ -158,6 +200,28 @@ export interface ProductInput {
   'quantity' : bigint,
   'category' : string,
 }
+export interface Purchase {
+  'id' : PurchaseId,
+  'status' : PurchaseStatus,
+  'supplierName' : string,
+  'date' : Timestamp,
+  'createdAt' : Timestamp,
+  'description' : [] | [string],
+  'amount' : bigint,
+  'supplierId' : [] | [SupplierId],
+}
+export type PurchaseId = bigint;
+export interface PurchaseInput {
+  'status' : PurchaseStatus,
+  'supplierName' : string,
+  'date' : Timestamp,
+  'description' : [] | [string],
+  'amount' : bigint,
+  'supplierId' : [] | [SupplierId],
+}
+export type PurchaseStatus = { 'cancelled' : null } |
+  { 'ordered' : null } |
+  { 'received' : null };
 export interface StockUpdate {
   'changedAt' : Timestamp,
   'productId' : ProductId,
@@ -168,41 +232,98 @@ export interface StockUpdate {
   'changeReason' : string,
 }
 export type StockUpdateId = bigint;
+export interface Supplier {
+  'id' : SupplierId,
+  'gstNumber' : [] | [string],
+  'name' : string,
+  'createdAt' : Timestamp,
+  'email' : [] | [string],
+  'totalPurchases' : bigint,
+  'updatedAt' : Timestamp,
+  'address' : [] | [string],
+  'notes' : [] | [string],
+  'paymentTerms' : [] | [string],
+  'phone' : string,
+  'pendingAmount' : bigint,
+}
+export type SupplierId = bigint;
+export interface SupplierInput {
+  'gstNumber' : [] | [string],
+  'name' : string,
+  'email' : [] | [string],
+  'address' : [] | [string],
+  'notes' : [] | [string],
+  'paymentTerms' : [] | [string],
+  'phone' : string,
+}
 export type Timestamp = bigint;
-export type UserRole = { 'admin' : null } |
+export interface UserInfo {
+  'principal' : Principal,
+  'createdAt' : Timestamp,
+  'role' : UserRole,
+  'isActive' : boolean,
+  'email' : string,
+}
+export type UserRole = { 'accountant' : null } |
+  { 'owner' : null } |
+  { 'staff' : null };
+export type UserRole__1 = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControl' : ActorMethod<[], undefined>,
-  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole__1], undefined>,
   'createCustomer' : ActorMethod<[CustomerInput], Customer>,
+  'createExpense' : ActorMethod<[ExpenseInput], Expense>,
   'createInvoice' : ActorMethod<[InvoiceInput], Invoice>,
   'createProduct' : ActorMethod<[ProductInput], Product>,
+  'createPurchase' : ActorMethod<[PurchaseInput], Purchase>,
+  'createSupplier' : ActorMethod<[SupplierInput], Supplier>,
   'deleteBusinessProfile' : ActorMethod<[], boolean>,
   'deleteCustomer' : ActorMethod<[CustomerId], boolean>,
+  'deleteExpense' : ActorMethod<[ExpenseId], boolean>,
   'deleteInvoice' : ActorMethod<[InvoiceId], boolean>,
   'deleteProduct' : ActorMethod<[ProductId], boolean>,
+  'deletePurchase' : ActorMethod<[PurchaseId], boolean>,
+  'deleteSupplier' : ActorMethod<[SupplierId], boolean>,
+  'getAdminStats' : ActorMethod<[], AdminStats>,
   'getBusinessProfile' : ActorMethod<[], [] | [BusinessProfile]>,
-  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getCallerUserRole' : ActorMethod<[], UserRole__1>,
   'getCustomer' : ActorMethod<[CustomerId], [] | [Customer]>,
   'getDashboardStats' : ActorMethod<[], DashboardStats>,
+  'getExpense' : ActorMethod<[ExpenseId], [] | [Expense]>,
   'getInvoice' : ActorMethod<[InvoiceId], [] | [Invoice]>,
   'getInvoicesByCustomer' : ActorMethod<[CustomerId], Array<Invoice>>,
   'getInvoicesByStatus' : ActorMethod<[InvoiceStatus], Array<Invoice>>,
   'getLowStockProducts' : ActorMethod<[], Array<Product>>,
   'getProduct' : ActorMethod<[ProductId], [] | [Product]>,
+  'getPurchase' : ActorMethod<[PurchaseId], [] | [Purchase]>,
   'getStockHistory' : ActorMethod<[ProductId], Array<StockUpdate>>,
+  'getSupplier' : ActorMethod<[SupplierId], [] | [Supplier]>,
+  'getTotalExpenses' : ActorMethod<[], bigint>,
+  'getUserByPrincipal' : ActorMethod<[Principal], [] | [UserInfo]>,
   'initSeedData' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'listCustomers' : ActorMethod<[bigint, bigint], PaginatedResult_2>,
+  'listExpenses' : ActorMethod<[], Array<Expense>>,
+  'listExpensesByCategory' : ActorMethod<[ExpenseCategory], Array<Expense>>,
   'listInvoices' : ActorMethod<[bigint, bigint], PaginatedResult_1>,
   'listProducts' : ActorMethod<[bigint, bigint], PaginatedResult>,
+  'listPurchases' : ActorMethod<[], Array<Purchase>>,
+  'listPurchasesByStatus' : ActorMethod<[PurchaseStatus], Array<Purchase>>,
+  'listPurchasesBySupplier' : ActorMethod<[SupplierId], Array<Purchase>>,
+  'listSuppliers' : ActorMethod<[], Array<Supplier>>,
+  'listUsers' : ActorMethod<[], Array<UserInfo>>,
+  'recordSupplierPayment' : ActorMethod<[SupplierId, bigint], boolean>,
+  'recordSupplierPurchase' : ActorMethod<[SupplierId, bigint], boolean>,
   'saveBusinessProfile' : ActorMethod<[BusinessProfileInput], BusinessProfile>,
+  'sendInvoiceEmail' : ActorMethod<[InvoiceId], boolean>,
   'updateBusinessProfile' : ActorMethod<
     [BusinessProfileInput],
     [] | [BusinessProfile]
   >,
   'updateCustomer' : ActorMethod<[CustomerId, CustomerInput], [] | [Customer]>,
+  'updateExpense' : ActorMethod<[ExpenseId, ExpenseInput], [] | [Expense]>,
   'updateInvoice' : ActorMethod<[InvoiceId, InvoiceInput], [] | [Invoice]>,
   'updateInvoicePaymentStatus' : ActorMethod<
     [InvoiceId, PaymentStatus],
@@ -213,6 +334,9 @@ export interface _SERVICE {
     [ProductId, bigint, string],
     [] | [StockUpdate]
   >,
+  'updatePurchase' : ActorMethod<[PurchaseId, PurchaseInput], [] | [Purchase]>,
+  'updateSupplier' : ActorMethod<[SupplierId, SupplierInput], [] | [Supplier]>,
+  'updateUserRole' : ActorMethod<[Principal, UserRole], [] | [UserInfo]>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

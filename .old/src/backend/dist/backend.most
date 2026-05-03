@@ -1,4 +1,4 @@
-// Version: 1.0.0
+// Version: 3.0.0
 type BusinessId__305161641 = Principal;
 type BusinessProfile__625766292 =
   {
@@ -28,6 +28,30 @@ type Customer__192853522 =
   };
 type Data__791452850<K, V> =
   {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type ExpenseCategory__830487605 =
+  {
+    #marketing;
+    #office;
+    #other;
+    #rawMaterials;
+    #rent;
+    #salaries;
+    #transport;
+    #utilities
+  };
+type ExpenseId__166408264 = Nat;
+type Expense__255157979 =
+  {
+    amount : Int;
+    category : ExpenseCategory__830487605;
+    createdAt : Timestamp__301639476;
+    date : Timestamp__301639476;
+    description : Text;
+    id : ExpenseId__166408264;
+    notes : ?Text;
+    receiptUrl : ?Text;
+    updatedAt : Timestamp__301639476
+  };
 type Internal__8484328<K, V> =
   {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
 type InvoiceId__909937669 = Nat;
@@ -51,6 +75,7 @@ type Invoice__785106573 =
     customerPhone : Text;
     discount : Nat;
     dueDate : ?Timestamp__301639476;
+    emailSent : Bool;
     invoiceId : InvoiceId__909937669;
     invoiceNumber : Text;
     items : [InvoiceItem__922149459];
@@ -63,6 +88,13 @@ type Invoice__785106573 =
     updatedAt : Timestamp__301639476
   };
 type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type List__415060402<T> = List__790383201<T>;
+type List__790383201<T> =
+  {
+    var blockIndex : Nat__490723111;
+    var blocks : [var [var ?T]];
+    var elementIndex : Nat__490723111
+  };
 type Map__158565046<K, V> = Map__297112838<K, V>;
 type Map__297112838<K, V> =
   {var root : Node__46230540<K, V>; var size : Nat__490723111};
@@ -71,6 +103,65 @@ type Nat__490723111 = Nat__920180692;
 type Nat__920180692 = Nat;
 type Node__46230540<K, V> =
   {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type OldCustomerId__663202481 = Nat;
+type OldExpenseCategory__1051140202 =
+  {
+    #marketing;
+    #office;
+    #other;
+    #rawMaterials;
+    #rent;
+    #salaries;
+    #transport;
+    #utilities
+  };
+type OldExpenseId__958345450 = Nat;
+type OldExpense__340868419 =
+  {
+    amount : Int;
+    category : OldExpenseCategory__1051140202;
+    createdAt : OldTimestamp__27916213;
+    date : OldTimestamp__27916213;
+    description : Text;
+    id : OldExpenseId__958345450;
+    notes : ?Text;
+    updatedAt : OldTimestamp__27916213
+  };
+type OldInvoiceId__867076861 = Nat;
+type OldInvoiceItem__1054262736 =
+  {
+    discount : Nat;
+    lineTotal : Nat;
+    productId : ?OldProductId__233768222;
+    productName : Text;
+    quantity : Nat;
+    taxPercent : Nat;
+    unitPrice : Nat
+  };
+type OldInvoiceStatus__46165592 = {#Draft; #Paid; #Sent};
+type OldInvoice__117248841 =
+  {
+    cgst : Nat;
+    createdAt : OldTimestamp__27916213;
+    customerId : ?OldCustomerId__663202481;
+    customerName : Text;
+    customerPhone : Text;
+    discount : Nat;
+    dueDate : ?OldTimestamp__27916213;
+    invoiceId : OldInvoiceId__867076861;
+    invoiceNumber : Text;
+    items : [OldInvoiceItem__1054262736];
+    notes : ?Text;
+    paymentStatus : OldPaymentStatus__257022736;
+    sgst : Nat;
+    status : OldInvoiceStatus__46165592;
+    subtotal : Nat;
+    total : Nat;
+    updatedAt : OldTimestamp__27916213
+  };
+type OldPaymentStatus__257022736 = {#Paid; #Partial; #Unpaid};
+type OldProductId__233768222 = Nat;
+type OldTimestamp__27916213 = Int;
 type PaymentStatus__1050999476 = {#Paid; #Partial; #Unpaid};
 type ProductId__160010635 = Nat;
 type Product__247116600 =
@@ -89,6 +180,19 @@ type Product__247116600 =
     taxPercent : Nat;
     unit : Text
   };
+type PurchaseId__839699237 = Nat;
+type PurchaseStatus__826688039 = {#cancelled; #ordered; #received};
+type Purchase__58899471 =
+  {
+    amount : Int;
+    createdAt : Timestamp__301639476;
+    date : Timestamp__301639476;
+    description : ?Text;
+    id : PurchaseId__839699237;
+    status : PurchaseStatus__826688039;
+    supplierId : ?SupplierId__1029492484;
+    supplierName : Text
+  };
 type StockUpdateId__188221532 = Nat;
 type StockUpdate__13183486 =
   {
@@ -100,13 +204,47 @@ type StockUpdate__13183486 =
     productName : Text;
     updateId : StockUpdateId__188221532
   };
+type SupplierId__1029492484 = Nat;
+type SupplierId__701716487 = Nat;
+type Supplier__936068473 =
+  {
+    address : ?Text;
+    createdAt : Timestamp__301639476;
+    email : ?Text;
+    gstNumber : ?Text;
+    id : SupplierId__701716487;
+    name : Text;
+    notes : ?Text;
+    paymentTerms : ?Text;
+    pendingAmount : Int;
+    phone : Text;
+    totalPurchases : Int;
+    updatedAt : Timestamp__301639476
+  };
 type Timestamp__301639476 = Int;
+type UserInfo__149372197 =
+  {
+    createdAt : Timestamp__301639476;
+    email : Text;
+    isActive : Bool;
+    principal : Principal;
+    role : UserRole__451090586
+  };
 type UserRole__1073662873 = {#admin; #guest; #user};
-actor {
+type UserRole__451090586 = {#accountant; #owner; #staff};
+actor ({
   stable accessControlState :
     {
       var adminAssigned : Bool;
       userRoles : Map__605269027<Principal, UserRole__1073662873>
+    };
+  stable adminActiveUsers : {var val : Nat};
+  stable adminTotalUsers : {var val : Nat};
+  stable adminUsers :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?UserInfo__149372197]];
+      var elementIndex : Nat__490723111
     };
   stable businessProfiles :
     {
@@ -119,20 +257,25 @@ actor {
       var blocks : [var [var ?Customer__192853522]];
       var elementIndex : Nat__490723111
     };
-  stable invoices :
-    {
-      var blockIndex : Nat__490723111;
-      var blocks : [var [var ?Invoice__785106573]];
-      var elementIndex : Nat__490723111
-    };
+  in expenses : List__415060402<OldExpense__340868419>;
+  in invoices : List__415060402<OldInvoice__117248841>;
   stable nextCustomerId : {var val : Nat};
+  stable nextExpenseId : {var val : Nat};
   stable nextInvoiceId : {var val : Nat};
   stable nextProductId : {var val : Nat};
+  stable nextPurchaseId : {var val : Nat};
   stable nextStockUpdateId : {var val : Nat};
+  stable nextSupplierId : {var val : Nat};
   stable products :
     {
       var blockIndex : Nat__490723111;
       var blocks : [var [var ?Product__247116600]];
+      var elementIndex : Nat__490723111
+    };
+  stable purchases :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Purchase__58899471]];
       var elementIndex : Nat__490723111
     };
   stable var seedDone : Bool;
@@ -141,5 +284,80 @@ actor {
       var blockIndex : Nat__490723111;
       var blocks : [var [var ?StockUpdate__13183486]];
       var elementIndex : Nat__490723111
+    };
+  stable suppliers :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Supplier__936068473]];
+      var elementIndex : Nat__490723111
     }
-};
+}, {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1073662873>
+    };
+  stable adminActiveUsers : {var val : Nat};
+  stable adminTotalUsers : {var val : Nat};
+  stable adminUsers :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?UserInfo__149372197]];
+      var elementIndex : Nat__490723111
+    };
+  stable businessProfiles :
+    {
+      var root : Node__46230540<Principal, BusinessProfile__625766292>;
+      var size : Nat__490723111
+    };
+  stable customers :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Customer__192853522]];
+      var elementIndex : Nat__490723111
+    };
+  stable expenses :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Expense__255157979]];
+      var elementIndex : Nat__490723111
+    };
+  stable invoices :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Invoice__785106573]];
+      var elementIndex : Nat__490723111
+    };
+  stable nextCustomerId : {var val : Nat};
+  stable nextExpenseId : {var val : Nat};
+  stable nextInvoiceId : {var val : Nat};
+  stable nextProductId : {var val : Nat};
+  stable nextPurchaseId : {var val : Nat};
+  stable nextStockUpdateId : {var val : Nat};
+  stable nextSupplierId : {var val : Nat};
+  stable products :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Product__247116600]];
+      var elementIndex : Nat__490723111
+    };
+  stable purchases :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Purchase__58899471]];
+      var elementIndex : Nat__490723111
+    };
+  stable var seedDone : Bool;
+  stable stockUpdates :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?StockUpdate__13183486]];
+      var elementIndex : Nat__490723111
+    };
+  stable suppliers :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Supplier__936068473]];
+      var elementIndex : Nat__490723111
+    }
+});

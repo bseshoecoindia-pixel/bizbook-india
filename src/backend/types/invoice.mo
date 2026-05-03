@@ -27,6 +27,7 @@ module {
     dueDate : ?CommonTypes.Timestamp;
     paymentStatus : CommonTypes.PaymentStatus;
     status : CommonTypes.InvoiceStatus;
+    emailSent : Bool;
     createdAt : CommonTypes.Timestamp;
     updatedAt : CommonTypes.Timestamp;
   };

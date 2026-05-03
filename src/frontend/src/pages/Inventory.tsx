@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProducts } from "@/hooks/useBackend";
+import { useQRScanner } from "@/lib/qr-shim";
 import { cn } from "@/lib/utils";
-import { useQRScanner } from "@caffeineai/qr-code";
 import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,

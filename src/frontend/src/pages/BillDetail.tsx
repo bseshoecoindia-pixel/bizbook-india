@@ -14,11 +14,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  useCustomer,
   useDeleteInvoice,
   useInvoice,
+  useSendInvoiceEmail,
   useUpdateInvoicePaymentStatus,
 } from "@/hooks/useBackend";
 import { cn } from "@/lib/utils";
@@ -28,11 +38,14 @@ import {
   CheckCircle2,
   ChevronLeft,
   Download,
+  Mail,
+  MailCheck,
   Pencil,
   Phone,
   Share2,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 function formatINR(paise: bigint): string {
@@ -94,6 +107,11 @@ export default function BillDetail() {
   const { mutate: updateStatus, isPending: updatingStatus } =
     useUpdateInvoicePaymentStatus();
   const { mutate: deleteInvoice, isPending: deleting } = useDeleteInvoice();
+  const { mutate: sendEmail, isPending: sendingEmail } = useSendInvoiceEmail();
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+
+  // Fetch customer to get email address
+  const { data: customer } = useCustomer(invoice?.customerId ?? null);
 
   const handleMarkPaid = () => {
     if (!invoice) return;
@@ -138,6 +156,24 @@ export default function BillDetail() {
   const handleDownload = () => {
     window.print();
   };
+
+  const handleSendEmail = () => {
+    if (!invoice) return;
+    sendEmail(invoice.invoiceId, {
+      onSuccess: () => {
+        toast.success("Invoice emailed successfully!");
+        setEmailDialogOpen(false);
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to send email",
+        );
+      },
+    });
+  };
+
+  const customerEmail = customer?.email ?? undefined;
+  const canEmail = !!customerEmail;
 
   return (
     <>
@@ -416,6 +452,46 @@ export default function BillDetail() {
               </Button>
             )}
 
+            {/* Email Invoice */}
+            {!invoice.customerId ? null : !canEmail ? (
+              <Button
+                variant="outline"
+                className="h-11 px-3 rounded-xl border-border text-muted-foreground"
+                onClick={() => toast.info("Customer has no email address")}
+                aria-label="No email available"
+                data-ocid="bill_detail.email_unavailable_button"
+                type="button"
+              >
+                <Mail size={16} />
+              </Button>
+            ) : invoice.emailSent ? (
+              <Button
+                variant="outline"
+                className="h-11 px-3 rounded-xl border-green-200 text-green-700 hover:bg-green-50 gap-1.5"
+                onClick={() => setEmailDialogOpen(true)}
+                aria-label="Email sent — resend"
+                data-ocid="bill_detail.email_sent_button"
+                type="button"
+              >
+                <MailCheck size={15} />
+                <span className="text-xs font-medium">Sent</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="h-11 px-3 rounded-xl border-border gap-1.5"
+                onClick={() => setEmailDialogOpen(true)}
+                aria-label="Email Invoice"
+                data-ocid="bill_detail.email_button"
+                type="button"
+              >
+                <Mail size={15} />
+                <span className="text-xs font-medium hidden sm:inline">
+                  Email
+                </span>
+              </Button>
+            )}
+
             {/* Download */}
             <Button
               variant="outline"
@@ -475,6 +551,72 @@ export default function BillDetail() {
             </AlertDialog>
           </div>
         </div>
+      )}
+      {/* Email confirmation dialog */}
+      {invoice && (
+        <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+          <DialogContent data-ocid="bill_detail.email_dialog">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail size={18} className="text-primary" />
+                {invoice.emailSent ? "Resend Invoice" : "Send Invoice"}
+              </DialogTitle>
+              <DialogDescription>
+                {canEmail ? (
+                  <>
+                    Send invoice{" "}
+                    <span className="font-semibold text-foreground">
+                      {invoice.invoiceNumber}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-semibold text-foreground">
+                      {customerEmail}
+                    </span>
+                    ?
+                    {invoice.emailSent && (
+                      <span className="block mt-1 text-amber-600 text-xs">
+                        This invoice was already emailed. Sending again will
+                        deliver a duplicate.
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  "Customer has no email address on file."
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => setEmailDialogOpen(false)}
+                data-ocid="bill_detail.email_cancel_button"
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button
+                className="rounded-xl gap-1.5"
+                onClick={handleSendEmail}
+                disabled={sendingEmail || !canEmail}
+                data-ocid="bill_detail.email_confirm_button"
+                type="button"
+              >
+                {sendingEmail ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full animate-spin" />
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    <Mail size={14} />
+                    {invoice.emailSent ? "Resend" : "Send Email"}
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );

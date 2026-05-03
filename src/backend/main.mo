@@ -18,7 +18,16 @@ import CustomerApi "mixins/customer-api";
 import ProductApi "mixins/product-api";
 import InvoiceApi "mixins/invoice-api";
 import DashboardApi "mixins/dashboard-api";
+import SupplierTypes "types/supplier";
+import ExpenseTypes "types/expense";
+import SupplierApi "mixins/supplier-api";
+import ExpenseApi "mixins/expense-api";
+import AdminApi "mixins/admin-api";
+import PurchaseTypes "types/purchase";
+import PurchaseApi "mixins/purchase-api";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // Authorization
   let accessControlState = AccessControl.initState();
@@ -43,10 +52,31 @@ actor {
   // Invoices
   let invoices : InvoiceLib.State = List.empty<InvoiceTypes.Invoice>();
   let nextInvoiceId = { var val : Nat = 1 };
-  include InvoiceApi(accessControlState, invoices, nextInvoiceId);
+  include InvoiceApi(accessControlState, invoices, nextInvoiceId, customers, businessProfiles);
 
   // Dashboard
   include DashboardApi(accessControlState, invoices, products, customers);
+
+  // Suppliers
+  let suppliers : List.List<SupplierTypes.Supplier> = List.empty<SupplierTypes.Supplier>();
+  let nextSupplierId = { var val : Nat = 1 };
+  include SupplierApi(accessControlState, suppliers, nextSupplierId);
+
+  // Expenses
+  let expenses : List.List<ExpenseTypes.Expense> = List.empty<ExpenseTypes.Expense>();
+  let nextExpenseId = { var val : Nat = 1 };
+  include ExpenseApi(accessControlState, expenses, nextExpenseId);
+
+  // Purchases
+  let purchases : List.List<PurchaseTypes.Purchase> = List.empty<PurchaseTypes.Purchase>();
+  let nextPurchaseId = { var val : Nat = 1 };
+  include PurchaseApi(accessControlState, purchases, nextPurchaseId);
+
+  // Admin
+  let adminUsers : List.List<CommonTypes.UserInfo> = List.empty<CommonTypes.UserInfo>();
+  let adminTotalUsers = { var val : Nat = 0 };
+  let adminActiveUsers = { var val : Nat = 0 };
+  include AdminApi(accessControlState, invoices, customers, suppliers, expenses, adminUsers, adminTotalUsers, adminActiveUsers);
 
   // Seed data flag
   var seedDone : Bool = false;
@@ -233,6 +263,7 @@ actor {
       dueDate = null;
       paymentStatus = #Paid;
       status = #Paid;
+      emailSent = false;
       createdAt = now - (2 * 86_400_000_000_000); // 2 days ago
       updatedAt = now - (1 * 86_400_000_000_000); // updated yesterday
     };
@@ -269,6 +300,7 @@ actor {
       dueDate = ?(now + (7 * 86_400_000_000_000)); // due in 7 days
       paymentStatus = #Unpaid;
       status = #Sent;
+      emailSent = false;
       createdAt = now - (1 * 86_400_000_000_000); // yesterday
       updatedAt = now - (1 * 86_400_000_000_000);
     };
@@ -305,10 +337,134 @@ actor {
       dueDate = null;
       paymentStatus = #Unpaid;
       status = #Draft;
+      emailSent = false;
       createdAt = now;
       updatedAt = now;
     };
     invoices.add(inv3);
     nextInvoiceId.val += 1;
+
+    // Seed 3 suppliers (realistic Indian businesses)
+    let s1 : SupplierTypes.Supplier = {
+      id = nextSupplierId.val;
+      name = "Sharma Enterprises";
+      phone = "9820123456";
+      email = ?"accounts@sharmaenterprises.com";
+      address = ?"Plot 45, MIDC Industrial Area, Andheri East, Mumbai - 400093";
+      gstNumber = ?"27AAFCS1234A1ZX";
+      paymentTerms = ?"Net 30 days";
+      notes = ?"Electrical goods & components supplier";
+      totalPurchases = 285000_00; // ₹2,85,000
+      pendingAmount = 45000_00;   // ₹45,000 pending
+      createdAt = now;
+      updatedAt = now;
+    };
+    suppliers.add(s1);
+    nextSupplierId.val += 1;
+
+    let s2 : SupplierTypes.Supplier = {
+      id = nextSupplierId.val;
+      name = "Kumar Textiles";
+      phone = "9911234567";
+      email = ?"kumartextiles@gmail.com";
+      address = ?"Chandni Chowk, Textile Market, Delhi - 110006";
+      gstNumber = ?"07AABCK5678B1ZQ";
+      paymentTerms = ?"Net 15 days";
+      notes = ?"Fabric & clothing wholesale supplier";
+      totalPurchases = 520000_00; // ₹5,20,000
+      pendingAmount = 0;
+      createdAt = now;
+      updatedAt = now;
+    };
+    suppliers.add(s2);
+    nextSupplierId.val += 1;
+
+    let s3 : SupplierTypes.Supplier = {
+      id = nextSupplierId.val;
+      name = "Patel Distributors";
+      phone = "9825678901";
+      email = ?"pateldist@yahoo.com";
+      address = ?"Ring Road, GIDC Estate, Vatva, Ahmedabad - 382445";
+      gstNumber = ?"24AACCP9012C1ZM";
+      paymentTerms = ?"Cash on delivery";
+      notes = ?"FMCG & household goods distributor";
+      totalPurchases = 180000_00; // ₹1,80,000
+      pendingAmount = 12000_00;   // ₹12,000 pending
+      createdAt = now;
+      updatedAt = now;
+    };
+    suppliers.add(s3);
+    nextSupplierId.val += 1;
+
+    // Seed 5 expenses (realistic Indian retail business)
+    let e1 : ExpenseTypes.Expense = {
+      id = nextExpenseId.val;
+      category = #rent;
+      amount = 35000_00; // ₹35,000
+      date = now - (15 * 86_400_000_000_000);
+      description = "Shop rent - Lajpat Nagar showroom";
+      notes = ?"Monthly rent for main retail outlet";
+      receiptUrl = null;
+      createdAt = now - (15 * 86_400_000_000_000);
+      updatedAt = now - (15 * 86_400_000_000_000);
+    };
+    expenses.add(e1);
+    nextExpenseId.val += 1;
+
+    let e2 : ExpenseTypes.Expense = {
+      id = nextExpenseId.val;
+      category = #utilities;
+      amount = 4800_00; // ₹4,800
+      date = now - (10 * 86_400_000_000_000);
+      description = "Electricity bill - BSES Rajdhani";
+      notes = ?"Monthly electricity for shop + storage";
+      receiptUrl = null;
+      createdAt = now - (10 * 86_400_000_000_000);
+      updatedAt = now - (10 * 86_400_000_000_000);
+    };
+    expenses.add(e2);
+    nextExpenseId.val += 1;
+
+    let e3 : ExpenseTypes.Expense = {
+      id = nextExpenseId.val;
+      category = #transport;
+      amount = 6500_00; // ₹6,500
+      date = now - (7 * 86_400_000_000_000);
+      description = "Goods transport - Delhi to Mumbai shipment";
+      notes = ?"Freight charges for textile stock delivery";
+      receiptUrl = null;
+      createdAt = now - (7 * 86_400_000_000_000);
+      updatedAt = now - (7 * 86_400_000_000_000);
+    };
+    expenses.add(e3);
+    nextExpenseId.val += 1;
+
+    let e4 : ExpenseTypes.Expense = {
+      id = nextExpenseId.val;
+      category = #rawMaterials;
+      amount = 92000_00; // ₹92,000
+      date = now - (5 * 86_400_000_000_000);
+      description = "Cotton fabric stock - Kumar Textiles";
+      notes = ?"Bulk purchase for next season collection";
+      receiptUrl = null;
+      createdAt = now - (5 * 86_400_000_000_000);
+      updatedAt = now - (5 * 86_400_000_000_000);
+    };
+    expenses.add(e4);
+    nextExpenseId.val += 1;
+
+    let e5 : ExpenseTypes.Expense = {
+      id = nextExpenseId.val;
+      category = #marketing;
+      amount = 8500_00; // ₹8,500
+      date = now - (2 * 86_400_000_000_000);
+      description = "Facebook & Instagram ads - festive season";
+      notes = ?"Diwali sale promotion campaign";
+      receiptUrl = null;
+      createdAt = now - (2 * 86_400_000_000_000);
+      updatedAt = now - (2 * 86_400_000_000_000);
+    };
+    expenses.add(e5);
+    nextExpenseId.val += 1;
   };
 };

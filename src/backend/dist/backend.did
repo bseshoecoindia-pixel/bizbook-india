@@ -1,10 +1,50 @@
-type UserRole = 
+type UserRole__1 = 
  variant {
    admin;
    guest;
    user;
  };
+type UserRole = 
+ variant {
+   accountant;
+   owner;
+   staff;
+ };
+type UserInfo = 
+ record {
+   createdAt: Timestamp;
+   email: text;
+   isActive: bool;
+   "principal": principal;
+   role: UserRole;
+ };
 type Timestamp = int;
+type SupplierInput = 
+ record {
+   address: opt text;
+   email: opt text;
+   gstNumber: opt text;
+   name: text;
+   notes: opt text;
+   paymentTerms: opt text;
+   phone: text;
+ };
+type SupplierId = nat;
+type Supplier = 
+ record {
+   address: opt text;
+   createdAt: Timestamp;
+   email: opt text;
+   gstNumber: opt text;
+   id: SupplierId;
+   name: text;
+   notes: opt text;
+   paymentTerms: opt text;
+   pendingAmount: int;
+   phone: text;
+   totalPurchases: int;
+   updatedAt: Timestamp;
+ };
 type StockUpdateId = nat;
 type StockUpdate = 
  record {
@@ -15,6 +55,33 @@ type StockUpdate =
    productId: ProductId;
    productName: text;
    updateId: StockUpdateId;
+ };
+type PurchaseStatus = 
+ variant {
+   cancelled;
+   ordered;
+   received;
+ };
+type PurchaseInput = 
+ record {
+   amount: int;
+   date: Timestamp;
+   description: opt text;
+   status: PurchaseStatus;
+   supplierId: opt SupplierId;
+   supplierName: text;
+ };
+type PurchaseId = nat;
+type Purchase = 
+ record {
+   amount: int;
+   createdAt: Timestamp;
+   date: Timestamp;
+   description: opt text;
+   id: PurchaseId;
+   status: PurchaseStatus;
+   supplierId: opt SupplierId;
+   supplierName: text;
  };
 type ProductInput = 
  record {
@@ -116,6 +183,7 @@ type Invoice =
    customerPhone: text;
    discount: nat;
    dueDate: opt Timestamp;
+   emailSent: bool;
    invoiceId: InvoiceId;
    invoiceNumber: text;
    items: vec InvoiceItem;
@@ -125,6 +193,39 @@ type Invoice =
    status: InvoiceStatus;
    subtotal: nat;
    total: nat;
+   updatedAt: Timestamp;
+ };
+type ExpenseInput = 
+ record {
+   amount: int;
+   category: ExpenseCategory;
+   date: Timestamp;
+   description: text;
+   notes: opt text;
+   receiptUrl: opt text;
+ };
+type ExpenseId = nat;
+type ExpenseCategory = 
+ variant {
+   marketing;
+   office;
+   other;
+   rawMaterials;
+   rent;
+   salaries;
+   transport;
+   utilities;
+ };
+type Expense = 
+ record {
+   amount: int;
+   category: ExpenseCategory;
+   createdAt: Timestamp;
+   date: Timestamp;
+   description: text;
+   id: ExpenseId;
+   notes: opt text;
+   receiptUrl: opt text;
    updatedAt: Timestamp;
  };
 type DashboardStats = 
@@ -183,39 +284,79 @@ type BusinessProfile =
    phone: text;
  };
 type BusinessId = principal;
+type AdminStats = 
+ record {
+   activeUsers: nat;
+   currentMonthRevenue: int;
+   customerCount: nat;
+   expenseCount: nat;
+   invoiceCount: nat;
+   netPL: int;
+   supplierCount: nat;
+   topMonthRevenue: int;
+   totalExpenses: int;
+   totalRevenue: int;
+   totalUsers: nat;
+ };
 service : {
   _initializeAccessControl: () -> ();
-  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole__1) -> ();
   createCustomer: (input: CustomerInput) -> (Customer);
+  createExpense: (input: ExpenseInput) -> (Expense);
   createInvoice: (input: InvoiceInput) -> (Invoice);
   createProduct: (input: ProductInput) -> (Product);
+  createPurchase: (input: PurchaseInput) -> (Purchase);
+  createSupplier: (input: SupplierInput) -> (Supplier);
   deleteBusinessProfile: () -> (bool);
   deleteCustomer: (id: CustomerId) -> (bool);
+  deleteExpense: (id: ExpenseId) -> (bool);
   deleteInvoice: (id: InvoiceId) -> (bool);
   deleteProduct: (id: ProductId) -> (bool);
+  deletePurchase: (id: PurchaseId) -> (bool);
+  deleteSupplier: (id: SupplierId) -> (bool);
+  getAdminStats: () -> (AdminStats) query;
   getBusinessProfile: () -> (opt BusinessProfile) query;
-  getCallerUserRole: () -> (UserRole) query;
+  getCallerUserRole: () -> (UserRole__1) query;
   getCustomer: (id: CustomerId) -> (opt Customer) query;
   getDashboardStats: () -> (DashboardStats) query;
+  getExpense: (id: ExpenseId) -> (opt Expense) query;
   getInvoice: (id: InvoiceId) -> (opt Invoice) query;
   getInvoicesByCustomer: (customerId: CustomerId) -> (vec Invoice) query;
   getInvoicesByStatus: (status: InvoiceStatus) -> (vec Invoice) query;
   getLowStockProducts: () -> (vec Product) query;
   getProduct: (id: ProductId) -> (opt Product) query;
+  getPurchase: (id: PurchaseId) -> (opt Purchase) query;
   getStockHistory: (id: ProductId) -> (vec StockUpdate) query;
+  getSupplier: (id: SupplierId) -> (opt Supplier) query;
+  getTotalExpenses: () -> (int) query;
+  getUserByPrincipal: (p: principal) -> (opt UserInfo) query;
   initSeedData: () -> ();
   isCallerAdmin: () -> (bool) query;
   listCustomers: (page: nat, pageSize: nat) -> (PaginatedResult_2) query;
+  listExpenses: () -> (vec Expense) query;
+  listExpensesByCategory: (category: ExpenseCategory) -> (vec Expense) query;
   listInvoices: (page: nat, pageSize: nat) -> (PaginatedResult_1) query;
   listProducts: (page: nat, pageSize: nat) -> (PaginatedResult) query;
+  listPurchases: () -> (vec Purchase) query;
+  listPurchasesByStatus: (status: PurchaseStatus) -> (vec Purchase) query;
+  listPurchasesBySupplier: (supplierId: SupplierId) -> (vec Purchase) query;
+  listSuppliers: () -> (vec Supplier) query;
+  listUsers: () -> (vec UserInfo) query;
+  recordSupplierPayment: (id: SupplierId, amount: int) -> (bool);
+  recordSupplierPurchase: (id: SupplierId, amount: int) -> (bool);
   saveBusinessProfile: (input: BusinessProfileInput) -> (BusinessProfile);
+  sendInvoiceEmail: (invoiceId: InvoiceId) -> (bool);
   updateBusinessProfile: (input: BusinessProfileInput) ->
    (opt BusinessProfile);
   updateCustomer: (id: CustomerId, input: CustomerInput) -> (opt Customer);
+  updateExpense: (id: ExpenseId, input: ExpenseInput) -> (opt Expense);
   updateInvoice: (id: InvoiceId, input: InvoiceInput) -> (opt Invoice);
   updateInvoicePaymentStatus: (id: InvoiceId, paymentStatus:
    PaymentStatus) -> (opt Invoice);
   updateProduct: (id: ProductId, input: ProductInput) -> (opt Product);
   updateProductStock: (id: ProductId, newQty: nat, reason: text) ->
    (opt StockUpdate);
+  updatePurchase: (id: PurchaseId, input: PurchaseInput) -> (opt Purchase);
+  updateSupplier: (id: SupplierId, input: SupplierInput) -> (opt Supplier);
+  updateUserRole: (p: principal, role: UserRole) -> (opt UserInfo);
 }

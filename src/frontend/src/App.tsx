@@ -1,5 +1,6 @@
 import { AuthLayout, Layout } from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
+import PurchasesPage from "@/pages/Purchases";
 import {
   Navigate,
   RouterProvider,
@@ -21,8 +22,11 @@ const InventoryPage = lazy(() => import("@/pages/Inventory"));
 const NewProductPage = lazy(() => import("@/pages/NewProduct"));
 const ProductDetailPage = lazy(() => import("@/pages/ProductDetail"));
 const CustomersPage = lazy(() => import("@/pages/Customers"));
+const SuppliersPage = lazy(() => import("@/pages/Suppliers"));
 const ReportsPage = lazy(() => import("@/pages/Reports"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
+const ExpensesPage = lazy(() => import("@/pages/Expenses"));
+const AdminPage = lazy(() => import("@/pages/Admin"));
 
 // ─── Page loader fallback ─────────────────────────────────────────────────
 function PageLoader() {
@@ -193,13 +197,12 @@ const settingsRoute = createRoute({
   ),
 });
 
-// Stub routes for drawer items
 const purchasesRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "/purchases",
   component: () => (
     <Wrap>
-      <DashboardPage />
+      <PurchasesPage />
     </Wrap>
   ),
 });
@@ -208,7 +211,7 @@ const expensesRoute = createRoute({
   path: "/expenses",
   component: () => (
     <Wrap>
-      <DashboardPage />
+      <ExpensesPage />
     </Wrap>
   ),
 });
@@ -217,10 +220,20 @@ const suppliersRoute = createRoute({
   path: "/suppliers",
   component: () => (
     <Wrap>
-      <CustomersPage />
+      <SuppliersPage />
     </Wrap>
   ),
 });
+const adminRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "/admin",
+  component: () => (
+    <Wrap>
+      <AdminPage />
+    </Wrap>
+  ),
+});
+
 const backupRoute = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "/backup",
@@ -250,6 +263,7 @@ const routeTree = rootRoute.addChildren([
     expensesRoute,
     suppliersRoute,
     backupRoute,
+    adminRoute,
   ]),
 ]);
 

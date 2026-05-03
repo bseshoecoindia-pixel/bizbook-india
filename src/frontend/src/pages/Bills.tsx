@@ -8,7 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoices } from "@/hooks/useBackend";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, FileText, Plus, Search, TrendingUp } from "lucide-react";
+import {
+  ChevronRight,
+  FileText,
+  MailCheck,
+  Plus,
+  Search,
+  TrendingUp,
+} from "lucide-react";
 import { useState } from "react";
 
 function formatINR(paise: bigint): string {
@@ -280,9 +287,18 @@ export default function Bills() {
 
                   {/* Amount + payment */}
                   <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                    <p className="text-sm font-bold text-foreground">
-                      ₹{formatINR(inv.total)}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      {inv.emailSent && (
+                        <MailCheck
+                          size={12}
+                          className="text-green-600 shrink-0"
+                          aria-label="Email sent"
+                        />
+                      )}
+                      <p className="text-sm font-bold text-foreground">
+                        ₹{formatINR(inv.total)}
+                      </p>
+                    </div>
                     <Badge
                       variant="outline"
                       className={cn(

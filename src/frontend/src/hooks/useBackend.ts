@@ -1,6 +1,27 @@
-import { createActor } from "@/backend";
-import type { Customer, DashboardStats, Invoice, Product } from "@/backend";
-import { InvoiceStatus, PaymentStatus } from "@/backend";
+import {
+  InvoiceStatus,
+  PaymentStatus,
+  PurchaseStatus,
+  type UserInfo,
+  type UserRole,
+  createActor,
+} from "@/backend";
+import type {
+  AdminStats,
+  Customer,
+  DashboardStats,
+  Expense,
+  ExpenseCategory,
+  ExpenseInput,
+  Invoice,
+  Product,
+  Purchase,
+  PurchaseId,
+  PurchaseInput,
+  Supplier,
+  SupplierId,
+  SupplierInput,
+} from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -29,6 +50,7 @@ const PLACEHOLDER_INVOICES: Invoice[] = [
     sgst: BigInt(108000),
     total: BigInt(1416000),
     items: [],
+    emailSent: false,
     createdAt: BigInt(Date.now() - 86400000) * BigInt(1000000),
     updatedAt: BigInt(Date.now()) * BigInt(1000000),
   },
@@ -45,6 +67,7 @@ const PLACEHOLDER_INVOICES: Invoice[] = [
     sgst: BigInt(45630),
     total: BigInt(603260),
     items: [],
+    emailSent: true,
     createdAt: BigInt(Date.now() - 2 * 86400000) * BigInt(1000000),
     updatedAt: BigInt(Date.now()) * BigInt(1000000),
   },
@@ -61,6 +84,7 @@ const PLACEHOLDER_INVOICES: Invoice[] = [
     sgst: BigInt(28800),
     total: BigInt(377600),
     items: [],
+    emailSent: false,
     createdAt: BigInt(Date.now() - 3 * 86400000) * BigInt(1000000),
     updatedAt: BigInt(Date.now()) * BigInt(1000000),
   },
@@ -335,6 +359,22 @@ export function useSaveBusinessProfile() {
   });
 }
 
+export function useUpdateBusinessProfile() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      input: Parameters<NonNullable<typeof actor>["updateBusinessProfile"]>[0],
+    ) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updateBusinessProfile(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["businessProfile"] });
+    },
+  });
+}
+
 export function useUpdateInvoicePaymentStatus() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();
@@ -405,6 +445,323 @@ export function useUpdateProductStock() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["lowStockProducts"] });
       queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+    },
+  });
+}
+
+const PLACEHOLDER_SUPPLIERS: Supplier[] = [
+  {
+    id: BigInt(1),
+    name: "Sharma Enterprises",
+    phone: "9820145678",
+    email: "sharma@example.com",
+    address: "Mumbai, Maharashtra",
+    gstNumber: "27AABCS1234A1Z5",
+    paymentTerms: "Net 30",
+    notes: undefined,
+    totalPurchases: BigInt(25000000),
+    pendingAmount: BigInt(5000000),
+    createdAt: BigInt(Date.now()) * BigInt(1000000),
+    updatedAt: BigInt(Date.now()) * BigInt(1000000),
+  },
+  {
+    id: BigInt(2),
+    name: "Kumar Textiles",
+    phone: "9911223344",
+    email: "kumar@kumartextiles.in",
+    address: "Chandni Chowk, New Delhi - 110006",
+    gstNumber: "07AAACK9876B1Z3",
+    paymentTerms: "Net 15",
+    notes: undefined,
+    totalPurchases: BigInt(18500000),
+    pendingAmount: BigInt(2300000),
+    createdAt: BigInt(Date.now() - 45 * 86400000) * BigInt(1000000),
+    updatedAt: BigInt(Date.now()) * BigInt(1000000),
+  },
+  {
+    id: BigInt(3),
+    name: "Patel Distributors",
+    phone: "9898765432",
+    email: "contact@pateldist.com",
+    address: "Raipur, Ahmedabad - 380022",
+    gstNumber: "24AABCP5432D1Z8",
+    paymentTerms: "Net 45",
+    notes: undefined,
+    totalPurchases: BigInt(32000000),
+    pendingAmount: BigInt(0),
+    createdAt: BigInt(Date.now() - 90 * 86400000) * BigInt(1000000),
+    updatedAt: BigInt(Date.now()) * BigInt(1000000),
+  },
+];
+
+// ─── Supplier hooks ────────────────────────────────────────────────────────
+
+export function useSuppliers() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Supplier[]>({
+    queryKey: ["suppliers"],
+    queryFn: async () => {
+      if (!actor) return PLACEHOLDER_SUPPLIERS;
+      return actor.listSuppliers();
+    },
+    enabled: !isFetching,
+  });
+}
+
+export function useSupplier(id: SupplierId | null) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Supplier | null>({
+    queryKey: ["supplier", id?.toString()],
+    queryFn: async () => {
+      if (!actor || id === null) return null;
+      return actor.getSupplier(id);
+    },
+    enabled: !isFetching && id !== null,
+  });
+}
+
+export function useCreateSupplier() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: SupplierInput) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.createSupplier(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+    },
+  });
+}
+
+export function useUpdateSupplier() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      input,
+    }: { id: SupplierId; input: SupplierInput }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updateSupplier(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+    },
+  });
+}
+
+export function useDeleteSupplier() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: SupplierId) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.deleteSupplier(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+    },
+  });
+}
+
+export function useAdminStats() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<AdminStats | null>({
+    queryKey: ["adminStats"],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getAdminStats();
+    },
+    enabled: !isFetching,
+    staleTime: 0,
+  });
+}
+
+export function useListUsers() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<UserInfo[]>({
+    queryKey: ["listUsers"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listUsers();
+    },
+    enabled: !isFetching,
+  });
+}
+
+export function useUpdateUserRole() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      principal,
+      role,
+    }: { principal: UserInfo["principal"]; role: UserRole }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updateUserRole(principal, role);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listUsers"] });
+    },
+  });
+}
+
+// ─── Expense Hooks ──────────────────────────────────────────────────────────
+
+export function useExpenses() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Expense[]>({
+    queryKey: ["expenses"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listExpenses();
+    },
+    enabled: !isFetching,
+  });
+}
+
+export function useExpensesByCategory(category: ExpenseCategory) {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Expense[]>({
+    queryKey: ["expenses", "category", category],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listExpensesByCategory(category);
+    },
+    enabled: !isFetching,
+  });
+}
+
+export function useTotalExpenses() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<bigint>({
+    queryKey: ["totalExpenses"],
+    queryFn: async () => {
+      if (!actor) return BigInt(0);
+      return actor.getTotalExpenses();
+    },
+    enabled: !isFetching,
+  });
+}
+
+export function useCreateExpense() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: ExpenseInput) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.createExpense(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["totalExpenses"] });
+    },
+  });
+}
+
+export function useUpdateExpense() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: bigint; input: ExpenseInput }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updateExpense(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["totalExpenses"] });
+    },
+  });
+}
+
+export function useDeleteExpense() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.deleteExpense(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["totalExpenses"] });
+    },
+  });
+}
+
+// ─── Purchase Hooks ──────────────────────────────────────────────────────────
+
+export function usePurchases() {
+  const { actor, isFetching } = useActor(createActor);
+  return useQuery<Purchase[]>({
+    queryKey: ["purchases"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listPurchases();
+    },
+    enabled: !isFetching,
+  });
+}
+
+export function useCreatePurchase() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: PurchaseInput) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.createPurchase(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["purchases"] });
+    },
+  });
+}
+
+export function useUpdatePurchase() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      input,
+    }: { id: PurchaseId; input: PurchaseInput }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.updatePurchase(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["purchases"] });
+    },
+  });
+}
+
+export function useDeletePurchase() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: PurchaseId) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.deletePurchase(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["purchases"] });
+    },
+  });
+}
+
+export function useSendInvoiceEmail() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (invoiceId: bigint) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.sendInvoiceEmail(invoiceId);
+    },
+    onSuccess: (_data, invoiceId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["invoice", invoiceId.toString()],
+      });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 }

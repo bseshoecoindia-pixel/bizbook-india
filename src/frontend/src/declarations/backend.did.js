@@ -8,7 +8,7 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const UserRole = IDL.Variant({
+export const UserRole__1 = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
@@ -32,6 +32,36 @@ export const Customer = IDL.Record({
   'phone' : IDL.Text,
   'pendingAmount' : IDL.Nat,
   'totalPurchaseAmount' : IDL.Nat,
+});
+export const ExpenseCategory = IDL.Variant({
+  'other' : IDL.Null,
+  'marketing' : IDL.Null,
+  'rent' : IDL.Null,
+  'transport' : IDL.Null,
+  'utilities' : IDL.Null,
+  'office' : IDL.Null,
+  'rawMaterials' : IDL.Null,
+  'salaries' : IDL.Null,
+});
+export const ExpenseInput = IDL.Record({
+  'receiptUrl' : IDL.Opt(IDL.Text),
+  'date' : Timestamp,
+  'description' : IDL.Text,
+  'notes' : IDL.Opt(IDL.Text),
+  'category' : ExpenseCategory,
+  'amount' : IDL.Int,
+});
+export const ExpenseId = IDL.Nat;
+export const Expense = IDL.Record({
+  'id' : ExpenseId,
+  'receiptUrl' : IDL.Opt(IDL.Text),
+  'date' : Timestamp,
+  'createdAt' : Timestamp,
+  'description' : IDL.Text,
+  'updatedAt' : Timestamp,
+  'notes' : IDL.Opt(IDL.Text),
+  'category' : ExpenseCategory,
+  'amount' : IDL.Int,
 });
 export const InvoiceStatus = IDL.Variant({
   'Paid' : IDL.Null,
@@ -85,6 +115,7 @@ export const Invoice = IDL.Record({
   'notes' : IDL.Opt(IDL.Text),
   'discount' : IDL.Nat,
   'customerId' : IDL.Opt(CustomerId),
+  'emailSent' : IDL.Bool,
   'items' : IDL.Vec(InvoiceItem),
   'subtotal' : IDL.Nat,
 });
@@ -116,6 +147,67 @@ export const Product = IDL.Record({
   'quantity' : IDL.Nat,
   'category' : IDL.Text,
 });
+export const PurchaseStatus = IDL.Variant({
+  'cancelled' : IDL.Null,
+  'ordered' : IDL.Null,
+  'received' : IDL.Null,
+});
+export const SupplierId = IDL.Nat;
+export const PurchaseInput = IDL.Record({
+  'status' : PurchaseStatus,
+  'supplierName' : IDL.Text,
+  'date' : Timestamp,
+  'description' : IDL.Opt(IDL.Text),
+  'amount' : IDL.Int,
+  'supplierId' : IDL.Opt(SupplierId),
+});
+export const PurchaseId = IDL.Nat;
+export const Purchase = IDL.Record({
+  'id' : PurchaseId,
+  'status' : PurchaseStatus,
+  'supplierName' : IDL.Text,
+  'date' : Timestamp,
+  'createdAt' : Timestamp,
+  'description' : IDL.Opt(IDL.Text),
+  'amount' : IDL.Int,
+  'supplierId' : IDL.Opt(SupplierId),
+});
+export const SupplierInput = IDL.Record({
+  'gstNumber' : IDL.Opt(IDL.Text),
+  'name' : IDL.Text,
+  'email' : IDL.Opt(IDL.Text),
+  'address' : IDL.Opt(IDL.Text),
+  'notes' : IDL.Opt(IDL.Text),
+  'paymentTerms' : IDL.Opt(IDL.Text),
+  'phone' : IDL.Text,
+});
+export const Supplier = IDL.Record({
+  'id' : SupplierId,
+  'gstNumber' : IDL.Opt(IDL.Text),
+  'name' : IDL.Text,
+  'createdAt' : Timestamp,
+  'email' : IDL.Opt(IDL.Text),
+  'totalPurchases' : IDL.Int,
+  'updatedAt' : Timestamp,
+  'address' : IDL.Opt(IDL.Text),
+  'notes' : IDL.Opt(IDL.Text),
+  'paymentTerms' : IDL.Opt(IDL.Text),
+  'phone' : IDL.Text,
+  'pendingAmount' : IDL.Int,
+});
+export const AdminStats = IDL.Record({
+  'activeUsers' : IDL.Nat,
+  'supplierCount' : IDL.Nat,
+  'expenseCount' : IDL.Nat,
+  'invoiceCount' : IDL.Nat,
+  'currentMonthRevenue' : IDL.Int,
+  'topMonthRevenue' : IDL.Int,
+  'totalExpenses' : IDL.Int,
+  'netPL' : IDL.Int,
+  'totalUsers' : IDL.Nat,
+  'customerCount' : IDL.Nat,
+  'totalRevenue' : IDL.Int,
+});
 export const BusinessId = IDL.Principal;
 export const BusinessProfile = IDL.Record({
   'businessId' : BusinessId,
@@ -146,6 +238,18 @@ export const StockUpdate = IDL.Record({
   'updateId' : StockUpdateId,
   'previousQty' : IDL.Nat,
   'changeReason' : IDL.Text,
+});
+export const UserRole = IDL.Variant({
+  'accountant' : IDL.Null,
+  'owner' : IDL.Null,
+  'staff' : IDL.Null,
+});
+export const UserInfo = IDL.Record({
+  'principal' : IDL.Principal,
+  'createdAt' : Timestamp,
+  'role' : UserRole,
+  'isActive' : IDL.Bool,
+  'email' : IDL.Text,
 });
 export const PaginatedResult_2 = IDL.Record({
   'total' : IDL.Nat,
@@ -179,18 +283,26 @@ export const BusinessProfileInput = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControl' : IDL.Func([], [], []),
-  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
   'createCustomer' : IDL.Func([CustomerInput], [Customer], []),
+  'createExpense' : IDL.Func([ExpenseInput], [Expense], []),
   'createInvoice' : IDL.Func([InvoiceInput], [Invoice], []),
   'createProduct' : IDL.Func([ProductInput], [Product], []),
+  'createPurchase' : IDL.Func([PurchaseInput], [Purchase], []),
+  'createSupplier' : IDL.Func([SupplierInput], [Supplier], []),
   'deleteBusinessProfile' : IDL.Func([], [IDL.Bool], []),
   'deleteCustomer' : IDL.Func([CustomerId], [IDL.Bool], []),
+  'deleteExpense' : IDL.Func([ExpenseId], [IDL.Bool], []),
   'deleteInvoice' : IDL.Func([InvoiceId], [IDL.Bool], []),
   'deleteProduct' : IDL.Func([ProductId], [IDL.Bool], []),
+  'deletePurchase' : IDL.Func([PurchaseId], [IDL.Bool], []),
+  'deleteSupplier' : IDL.Func([SupplierId], [IDL.Bool], []),
+  'getAdminStats' : IDL.Func([], [AdminStats], ['query']),
   'getBusinessProfile' : IDL.Func([], [IDL.Opt(BusinessProfile)], ['query']),
-  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole__1], ['query']),
   'getCustomer' : IDL.Func([CustomerId], [IDL.Opt(Customer)], ['query']),
   'getDashboardStats' : IDL.Func([], [DashboardStats], ['query']),
+  'getExpense' : IDL.Func([ExpenseId], [IDL.Opt(Expense)], ['query']),
   'getInvoice' : IDL.Func([InvoiceId], [IDL.Opt(Invoice)], ['query']),
   'getInvoicesByCustomer' : IDL.Func(
       [CustomerId],
@@ -204,7 +316,15 @@ export const idlService = IDL.Service({
     ),
   'getLowStockProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getProduct' : IDL.Func([ProductId], [IDL.Opt(Product)], ['query']),
+  'getPurchase' : IDL.Func([PurchaseId], [IDL.Opt(Purchase)], ['query']),
   'getStockHistory' : IDL.Func([ProductId], [IDL.Vec(StockUpdate)], ['query']),
+  'getSupplier' : IDL.Func([SupplierId], [IDL.Opt(Supplier)], ['query']),
+  'getTotalExpenses' : IDL.Func([], [IDL.Int], ['query']),
+  'getUserByPrincipal' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserInfo)],
+      ['query'],
+    ),
   'initSeedData' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'listCustomers' : IDL.Func(
@@ -212,13 +332,35 @@ export const idlService = IDL.Service({
       [PaginatedResult_2],
       ['query'],
     ),
+  'listExpenses' : IDL.Func([], [IDL.Vec(Expense)], ['query']),
+  'listExpensesByCategory' : IDL.Func(
+      [ExpenseCategory],
+      [IDL.Vec(Expense)],
+      ['query'],
+    ),
   'listInvoices' : IDL.Func([IDL.Nat, IDL.Nat], [PaginatedResult_1], ['query']),
   'listProducts' : IDL.Func([IDL.Nat, IDL.Nat], [PaginatedResult], ['query']),
+  'listPurchases' : IDL.Func([], [IDL.Vec(Purchase)], ['query']),
+  'listPurchasesByStatus' : IDL.Func(
+      [PurchaseStatus],
+      [IDL.Vec(Purchase)],
+      ['query'],
+    ),
+  'listPurchasesBySupplier' : IDL.Func(
+      [SupplierId],
+      [IDL.Vec(Purchase)],
+      ['query'],
+    ),
+  'listSuppliers' : IDL.Func([], [IDL.Vec(Supplier)], ['query']),
+  'listUsers' : IDL.Func([], [IDL.Vec(UserInfo)], ['query']),
+  'recordSupplierPayment' : IDL.Func([SupplierId, IDL.Int], [IDL.Bool], []),
+  'recordSupplierPurchase' : IDL.Func([SupplierId, IDL.Int], [IDL.Bool], []),
   'saveBusinessProfile' : IDL.Func(
       [BusinessProfileInput],
       [BusinessProfile],
       [],
     ),
+  'sendInvoiceEmail' : IDL.Func([InvoiceId], [IDL.Bool], []),
   'updateBusinessProfile' : IDL.Func(
       [BusinessProfileInput],
       [IDL.Opt(BusinessProfile)],
@@ -229,6 +371,7 @@ export const idlService = IDL.Service({
       [IDL.Opt(Customer)],
       [],
     ),
+  'updateExpense' : IDL.Func([ExpenseId, ExpenseInput], [IDL.Opt(Expense)], []),
   'updateInvoice' : IDL.Func([InvoiceId, InvoiceInput], [IDL.Opt(Invoice)], []),
   'updateInvoicePaymentStatus' : IDL.Func(
       [InvoiceId, PaymentStatus],
@@ -241,12 +384,27 @@ export const idlService = IDL.Service({
       [IDL.Opt(StockUpdate)],
       [],
     ),
+  'updatePurchase' : IDL.Func(
+      [PurchaseId, PurchaseInput],
+      [IDL.Opt(Purchase)],
+      [],
+    ),
+  'updateSupplier' : IDL.Func(
+      [SupplierId, SupplierInput],
+      [IDL.Opt(Supplier)],
+      [],
+    ),
+  'updateUserRole' : IDL.Func(
+      [IDL.Principal, UserRole],
+      [IDL.Opt(UserInfo)],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const UserRole = IDL.Variant({
+  const UserRole__1 = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
@@ -270,6 +428,36 @@ export const idlFactory = ({ IDL }) => {
     'phone' : IDL.Text,
     'pendingAmount' : IDL.Nat,
     'totalPurchaseAmount' : IDL.Nat,
+  });
+  const ExpenseCategory = IDL.Variant({
+    'other' : IDL.Null,
+    'marketing' : IDL.Null,
+    'rent' : IDL.Null,
+    'transport' : IDL.Null,
+    'utilities' : IDL.Null,
+    'office' : IDL.Null,
+    'rawMaterials' : IDL.Null,
+    'salaries' : IDL.Null,
+  });
+  const ExpenseInput = IDL.Record({
+    'receiptUrl' : IDL.Opt(IDL.Text),
+    'date' : Timestamp,
+    'description' : IDL.Text,
+    'notes' : IDL.Opt(IDL.Text),
+    'category' : ExpenseCategory,
+    'amount' : IDL.Int,
+  });
+  const ExpenseId = IDL.Nat;
+  const Expense = IDL.Record({
+    'id' : ExpenseId,
+    'receiptUrl' : IDL.Opt(IDL.Text),
+    'date' : Timestamp,
+    'createdAt' : Timestamp,
+    'description' : IDL.Text,
+    'updatedAt' : Timestamp,
+    'notes' : IDL.Opt(IDL.Text),
+    'category' : ExpenseCategory,
+    'amount' : IDL.Int,
   });
   const InvoiceStatus = IDL.Variant({
     'Paid' : IDL.Null,
@@ -323,6 +511,7 @@ export const idlFactory = ({ IDL }) => {
     'notes' : IDL.Opt(IDL.Text),
     'discount' : IDL.Nat,
     'customerId' : IDL.Opt(CustomerId),
+    'emailSent' : IDL.Bool,
     'items' : IDL.Vec(InvoiceItem),
     'subtotal' : IDL.Nat,
   });
@@ -354,6 +543,67 @@ export const idlFactory = ({ IDL }) => {
     'quantity' : IDL.Nat,
     'category' : IDL.Text,
   });
+  const PurchaseStatus = IDL.Variant({
+    'cancelled' : IDL.Null,
+    'ordered' : IDL.Null,
+    'received' : IDL.Null,
+  });
+  const SupplierId = IDL.Nat;
+  const PurchaseInput = IDL.Record({
+    'status' : PurchaseStatus,
+    'supplierName' : IDL.Text,
+    'date' : Timestamp,
+    'description' : IDL.Opt(IDL.Text),
+    'amount' : IDL.Int,
+    'supplierId' : IDL.Opt(SupplierId),
+  });
+  const PurchaseId = IDL.Nat;
+  const Purchase = IDL.Record({
+    'id' : PurchaseId,
+    'status' : PurchaseStatus,
+    'supplierName' : IDL.Text,
+    'date' : Timestamp,
+    'createdAt' : Timestamp,
+    'description' : IDL.Opt(IDL.Text),
+    'amount' : IDL.Int,
+    'supplierId' : IDL.Opt(SupplierId),
+  });
+  const SupplierInput = IDL.Record({
+    'gstNumber' : IDL.Opt(IDL.Text),
+    'name' : IDL.Text,
+    'email' : IDL.Opt(IDL.Text),
+    'address' : IDL.Opt(IDL.Text),
+    'notes' : IDL.Opt(IDL.Text),
+    'paymentTerms' : IDL.Opt(IDL.Text),
+    'phone' : IDL.Text,
+  });
+  const Supplier = IDL.Record({
+    'id' : SupplierId,
+    'gstNumber' : IDL.Opt(IDL.Text),
+    'name' : IDL.Text,
+    'createdAt' : Timestamp,
+    'email' : IDL.Opt(IDL.Text),
+    'totalPurchases' : IDL.Int,
+    'updatedAt' : Timestamp,
+    'address' : IDL.Opt(IDL.Text),
+    'notes' : IDL.Opt(IDL.Text),
+    'paymentTerms' : IDL.Opt(IDL.Text),
+    'phone' : IDL.Text,
+    'pendingAmount' : IDL.Int,
+  });
+  const AdminStats = IDL.Record({
+    'activeUsers' : IDL.Nat,
+    'supplierCount' : IDL.Nat,
+    'expenseCount' : IDL.Nat,
+    'invoiceCount' : IDL.Nat,
+    'currentMonthRevenue' : IDL.Int,
+    'topMonthRevenue' : IDL.Int,
+    'totalExpenses' : IDL.Int,
+    'netPL' : IDL.Int,
+    'totalUsers' : IDL.Nat,
+    'customerCount' : IDL.Nat,
+    'totalRevenue' : IDL.Int,
+  });
   const BusinessId = IDL.Principal;
   const BusinessProfile = IDL.Record({
     'businessId' : BusinessId,
@@ -384,6 +634,18 @@ export const idlFactory = ({ IDL }) => {
     'updateId' : StockUpdateId,
     'previousQty' : IDL.Nat,
     'changeReason' : IDL.Text,
+  });
+  const UserRole = IDL.Variant({
+    'accountant' : IDL.Null,
+    'owner' : IDL.Null,
+    'staff' : IDL.Null,
+  });
+  const UserInfo = IDL.Record({
+    'principal' : IDL.Principal,
+    'createdAt' : Timestamp,
+    'role' : UserRole,
+    'isActive' : IDL.Bool,
+    'email' : IDL.Text,
   });
   const PaginatedResult_2 = IDL.Record({
     'total' : IDL.Nat,
@@ -417,18 +679,26 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControl' : IDL.Func([], [], []),
-    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
     'createCustomer' : IDL.Func([CustomerInput], [Customer], []),
+    'createExpense' : IDL.Func([ExpenseInput], [Expense], []),
     'createInvoice' : IDL.Func([InvoiceInput], [Invoice], []),
     'createProduct' : IDL.Func([ProductInput], [Product], []),
+    'createPurchase' : IDL.Func([PurchaseInput], [Purchase], []),
+    'createSupplier' : IDL.Func([SupplierInput], [Supplier], []),
     'deleteBusinessProfile' : IDL.Func([], [IDL.Bool], []),
     'deleteCustomer' : IDL.Func([CustomerId], [IDL.Bool], []),
+    'deleteExpense' : IDL.Func([ExpenseId], [IDL.Bool], []),
     'deleteInvoice' : IDL.Func([InvoiceId], [IDL.Bool], []),
     'deleteProduct' : IDL.Func([ProductId], [IDL.Bool], []),
+    'deletePurchase' : IDL.Func([PurchaseId], [IDL.Bool], []),
+    'deleteSupplier' : IDL.Func([SupplierId], [IDL.Bool], []),
+    'getAdminStats' : IDL.Func([], [AdminStats], ['query']),
     'getBusinessProfile' : IDL.Func([], [IDL.Opt(BusinessProfile)], ['query']),
-    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole__1], ['query']),
     'getCustomer' : IDL.Func([CustomerId], [IDL.Opt(Customer)], ['query']),
     'getDashboardStats' : IDL.Func([], [DashboardStats], ['query']),
+    'getExpense' : IDL.Func([ExpenseId], [IDL.Opt(Expense)], ['query']),
     'getInvoice' : IDL.Func([InvoiceId], [IDL.Opt(Invoice)], ['query']),
     'getInvoicesByCustomer' : IDL.Func(
         [CustomerId],
@@ -442,9 +712,17 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getLowStockProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getProduct' : IDL.Func([ProductId], [IDL.Opt(Product)], ['query']),
+    'getPurchase' : IDL.Func([PurchaseId], [IDL.Opt(Purchase)], ['query']),
     'getStockHistory' : IDL.Func(
         [ProductId],
         [IDL.Vec(StockUpdate)],
+        ['query'],
+      ),
+    'getSupplier' : IDL.Func([SupplierId], [IDL.Opt(Supplier)], ['query']),
+    'getTotalExpenses' : IDL.Func([], [IDL.Int], ['query']),
+    'getUserByPrincipal' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserInfo)],
         ['query'],
       ),
     'initSeedData' : IDL.Func([], [], []),
@@ -454,17 +732,39 @@ export const idlFactory = ({ IDL }) => {
         [PaginatedResult_2],
         ['query'],
       ),
+    'listExpenses' : IDL.Func([], [IDL.Vec(Expense)], ['query']),
+    'listExpensesByCategory' : IDL.Func(
+        [ExpenseCategory],
+        [IDL.Vec(Expense)],
+        ['query'],
+      ),
     'listInvoices' : IDL.Func(
         [IDL.Nat, IDL.Nat],
         [PaginatedResult_1],
         ['query'],
       ),
     'listProducts' : IDL.Func([IDL.Nat, IDL.Nat], [PaginatedResult], ['query']),
+    'listPurchases' : IDL.Func([], [IDL.Vec(Purchase)], ['query']),
+    'listPurchasesByStatus' : IDL.Func(
+        [PurchaseStatus],
+        [IDL.Vec(Purchase)],
+        ['query'],
+      ),
+    'listPurchasesBySupplier' : IDL.Func(
+        [SupplierId],
+        [IDL.Vec(Purchase)],
+        ['query'],
+      ),
+    'listSuppliers' : IDL.Func([], [IDL.Vec(Supplier)], ['query']),
+    'listUsers' : IDL.Func([], [IDL.Vec(UserInfo)], ['query']),
+    'recordSupplierPayment' : IDL.Func([SupplierId, IDL.Int], [IDL.Bool], []),
+    'recordSupplierPurchase' : IDL.Func([SupplierId, IDL.Int], [IDL.Bool], []),
     'saveBusinessProfile' : IDL.Func(
         [BusinessProfileInput],
         [BusinessProfile],
         [],
       ),
+    'sendInvoiceEmail' : IDL.Func([InvoiceId], [IDL.Bool], []),
     'updateBusinessProfile' : IDL.Func(
         [BusinessProfileInput],
         [IDL.Opt(BusinessProfile)],
@@ -473,6 +773,11 @@ export const idlFactory = ({ IDL }) => {
     'updateCustomer' : IDL.Func(
         [CustomerId, CustomerInput],
         [IDL.Opt(Customer)],
+        [],
+      ),
+    'updateExpense' : IDL.Func(
+        [ExpenseId, ExpenseInput],
+        [IDL.Opt(Expense)],
         [],
       ),
     'updateInvoice' : IDL.Func(
@@ -493,6 +798,21 @@ export const idlFactory = ({ IDL }) => {
     'updateProductStock' : IDL.Func(
         [ProductId, IDL.Nat, IDL.Text],
         [IDL.Opt(StockUpdate)],
+        [],
+      ),
+    'updatePurchase' : IDL.Func(
+        [PurchaseId, PurchaseInput],
+        [IDL.Opt(Purchase)],
+        [],
+      ),
+    'updateSupplier' : IDL.Func(
+        [SupplierId, SupplierInput],
+        [IDL.Opt(Supplier)],
+        [],
+      ),
+    'updateUserRole' : IDL.Func(
+        [IDL.Principal, UserRole],
+        [IDL.Opt(UserInfo)],
         [],
       ),
   });

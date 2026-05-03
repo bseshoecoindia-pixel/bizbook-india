@@ -28,6 +28,7 @@ module {
       dueDate = input.dueDate;
       paymentStatus = input.paymentStatus;
       status = input.status;
+      emailSent = false;
       createdAt = now;
       updatedAt = now;
     };
@@ -109,6 +110,18 @@ module {
     state.mapInPlace(func(inv) {
       if (inv.invoiceId == id) {
         let u : InvoiceTypes.Invoice = { inv with paymentStatus; updatedAt = Time.now() };
+        updated := ?u;
+        u;
+      } else { inv };
+    });
+    updated;
+  };
+
+  public func markEmailSent(state : State, id : CommonTypes.InvoiceId) : ?InvoiceTypes.Invoice {
+    var updated : ?InvoiceTypes.Invoice = null;
+    state.mapInPlace(func(inv) {
+      if (inv.invoiceId == id) {
+        let u : InvoiceTypes.Invoice = { inv with emailSent = true; updatedAt = Time.now() };
         updated := ?u;
         u;
       } else { inv };
